@@ -18,6 +18,7 @@ file_input = sys.stdin.read().rstrip()
 final_string = ''
 
 # function to split the string into an array of a specific length
+# Big-O = n where n = length of instr
 def splitStr(instr, length):
 	instr = list(instr)
 	strArr = []
@@ -37,6 +38,7 @@ def arrToStr(inArr):
 	return output
 
 # figures out the appropriate length for the splitStr fxn
+# Big-O = 1*n where n = length of standard input
 if (len(file_input)%7 == 0):
 	input_list = list(splitStr(file_input, 7))
 elif (len(file_input)%8 == 0):
@@ -51,14 +53,21 @@ else:
 charArrs = []
 
 # converts each sub list to a string of 1's and 0's
+# Big-O = n/7 or n/8 where n = length of standard input
 for char in input_list:
 	charArrs.append(arrToStr(char))
 
 # converts from binary to int, then to char and
 # adds it to an empty string
+# Big-O = n/7 or n/8 where n = length of standard input
 for char in charArrs:
 	temp = int(char, base=2)
 	final_string = final_string + chr(temp)
+
+# Final Big-O = 1*n + n/7 + n/7
+# 			  = n
+# Therefore the runtime is linear
+# based on the size of the standard input
 
 # outputs to standard out
 sys.stdout.write(final_string + '\n')

@@ -1,4 +1,14 @@
 #!/usr/bin/env python2
+
+'''
+Team Celtics
+
+Link to private GitHub:
+https://github.com/zbrasseaux/CSC-442-_-Cyberstorm
+
+If you need access to it, please email any of out members.
+'''
+
 import sys, string, re
 
 ###################validation###################

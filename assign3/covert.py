@@ -1,7 +1,6 @@
 from ftplib import FTP
 dirList = []
-METHOD = 7
-
+METHOD = 10
 
 
 def conToBinary(filePermList):
@@ -15,9 +14,9 @@ def conToBinary(filePermList):
                 tempHolder = tempHolder + "1"
         convertBinary.append(tempHolder)
         
-    print(" ")
+    print " "
     for f in range(len(convertBinary)):
-        print(convertBinary[f])
+        print convertBinary[f]
         
     return convertBinary
 
@@ -26,17 +25,17 @@ def conToInt(fullBinary):
     for l in range(len(fullBinary)):
         binaryInt.append(int(fullBinary[l],2))
         
-    print("")
+    print ""
     for y in range(len(binaryInt)):
-        print(binaryInt[y])
+        print binaryInt[y]
     return binaryInt
 
 def conToASCII(binaryInt):
     ASCIIrep = [] 
     for u in range(len(binaryInt)):
         ASCIIrep.append(chr(binaryInt[u]))
-    print("")
-    print(ASCIIrep)
+    print ""
+    print ASCIIrep
     return ASCIIrep
 
 ftp = FTP('jeangourd.com')
@@ -45,12 +44,12 @@ ftp.retrlines('LIST',dirList.append)
 ftp.quit()
 
 for i in range(len(dirList)):
-    print(dirList[i])
-print(" ")
+    print dirList[i]
+print" "
 
 filePermList = []
 for i in range(len(dirList)):
-    print(dirList[i][0:10])
+    print dirList[i][0:10]
     filePermList.append(dirList[i][0:10])
     
 #############################################################################################################################
@@ -80,18 +79,49 @@ if(METHOD == 7):
     for o in range(len(filePermList)):
         permList.append(filePermList[o][3:10])
 #Prints a list of file permissions now formatted to last 7 bits     
-    print("")
+    print ""
     for y in range(len(permList)):
-        print(permList[y])
+        print permList[y]
 #Runs method to convert list to binary    
     fullBinary = conToBinary(permList)
 #Runs method to convert binary list to integer
     binaryInt = conToInt(fullBinary)
 #Runs method to convert integers to ASCII characters
     ASCII = conToASCII(binaryInt)
-    print(ASCII)
 
 elif(METHOD == 10):
-    longString = ""
+    longString = []
     for r in range(len(filePermList)):
-        longString = longString + filePermList[0]
+        longString.append(filePermList[r])
+    print ""
+    print "String: {}".format(longString)
+
+#Finds if the length is easily broken up into groups of 7, adds zeroes to the last one if not
+    lengthString = len(longString)
+    modVal = lengthString % 7
+    print("Mod Value: {}".format(modVal))
+    print("Modulus is not 0, adding {} zeros...".format(modVal))
+    if(modVal != 0):
+        addValue = 7-modVal
+        longString[-1] = "-"*addValue + longString[-1]
+        print("\n New String: {}".format(longString))
+    newString = ""
+    for n in range(len(longString)):
+        newString += longString[n]
+    print newString
+
+    bit7Convert = []
+    for v in range(len(newString)/7):
+        bit7Convert.append(newString[(7*v):(7+(7*v))])
+    for b in range(len(bit7Convert)):
+        print bit7Convert[b]
+#Runs method to convert list to binary    
+    fullBinary = conToBinary(bit7Convert)
+#Runs method to convert binary list to integer
+    binaryInt = conToInt(fullBinary)
+#Runs method to convert integers to ASCII characters
+    ASCII = conToASCII(binaryInt)
+        
+    
+        
+    

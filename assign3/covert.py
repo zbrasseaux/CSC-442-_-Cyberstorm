@@ -15,9 +15,9 @@ def conToBinary(filePermList):
                 tempHolder = tempHolder + "1"
         convertBinary.append(tempHolder)
         
-    print " "
+    print(" ")
     for f in range(len(convertBinary)):
-        print convertBinary[f]
+        print(convertBinary[f])
         
     return convertBinary
 
@@ -26,17 +26,17 @@ def conToInt(fullBinary):
     for l in range(len(fullBinary)):
         binaryInt.append(int(fullBinary[l],2))
         
-    print ""
+    print("")
     for y in range(len(binaryInt)):
-        print binaryInt[y]
+        print(binaryInt[y])
     return binaryInt
 
 def conToASCII(binaryInt):
     ASCIIrep = [] 
     for u in range(len(binaryInt)):
         ASCIIrep.append(chr(binaryInt[u]))
-    print ""
-    print ASCIIrep
+    print("")
+    print(ASCIIrep)
     return ASCIIrep
 
 ftp = FTP('jeangourd.com')
@@ -45,12 +45,12 @@ ftp.retrlines('LIST',dirList.append)
 ftp.quit()
 
 for i in range(len(dirList)):
-    print dirList[i]
-print" "
+    print(dirList[i])
+print(" ")
 
 filePermList = []
 for i in range(len(dirList)):
-    print dirList[i][0:10]
+    print(dirList[i][0:10])
     filePermList.append(dirList[i][0:10])
     
 #############################################################################################################################
@@ -80,16 +80,16 @@ if(METHOD == 7):
     for o in range(len(filePermList)):
         permList.append(filePermList[o][3:10])
 #Prints a list of file permissions now formatted to last 7 bits     
-    print ""
+    print("")
     for y in range(len(permList)):
-        print permList[y]
+        print(permList[y])
 #Runs method to convert list to binary    
     fullBinary = conToBinary(permList)
 #Runs method to convert binary list to integer
     binaryInt = conToInt(fullBinary)
 #Runs method to convert integers to ASCII characters
     ASCII = conToASCII(binaryInt)
-    print ASCII
+    print(ASCII)
 
 elif(METHOD == 10):
     longString = ""

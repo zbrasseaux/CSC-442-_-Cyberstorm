@@ -1,54 +1,66 @@
-#!/usr/bin/env python3
-import sys
+#!/usr/bin/env python2
 
-alphabet_length = 26
+'''
+Team Celtics
 
-def strToAscii(inArr):
-	temp = []
-	for char in inArr:
-		temp.append(ord(char))
+Link to private GitHub:
+https://github.com/zbrasseaux/CSC-442-_-Cyberstorm
 
-	return temp
+If you need access to it, please email any of out members.
+'''
 
-def asciiToStr(inArr):
-	temp = ""
+import sys, string, re
 
-	for char in inArr:
-		temp = temp + chr(char)
+###################validation###################
+try:
+    mode = sys.argv[1] #-e for encrypt or -d for decrypt (must have tag)
+except IndexError:
+    print "You must pass in the flag -e (for encryption) or -d (for decryption)"
+    exit()
 
-	return temp
+if mode != "-e" and mode != "--encryption" and mode != "-d" and mode != "--decryption": #make sure the flag is either -e, --encryption, -d, or --decryption
+    print "You must pass in the flag -e (for encryption) or -d (for decryption)"
+    exit()
 
-def encrypt(key, inString):
-	finArr = []
+try:
+    key = sys.argv[2] #what ever comes after the tag is the key
+except IndexError:
+    print "You must must enter a valid key (must contain at least one alpha)"
+    exit()
 
-	key = strToAscii(list(key))
-	inString = strToAscii(list(inString))
+if not re.search("[a-zA-Z]", key): #make sure there is at least one alpha character in the key that we can encrypt/decrypt by
+    print "You must must enter a valid key (must contain at least one alpha)"
+    exit()
+################################################
 
-	for i in range(0,len(inString)):
-		kval = i%len(key)
-		finArr.append((inString[i] + key[kval]) % alphabet_length)
+while (True):
+    try:
+        input_text = raw_input() #text we will encrypt/decrypt
+    except EOFError: #EOFError will be caused by ^D so we exit instead of giving a stacktrace
+        exit()
+    output_text = '' #this is what will be printed to the console
+    j = 0 #we will use j to interate over the characters of the key
+    for i in range(len(input_text)):
+        while not key[j].isalpha(): #skip all of the non-alpha characters in the key
+            j += 1
+        if (input_text[i].isalpha() and (mode == "-e" or mode == "--encryption")): #if the current character is an alpha character and we are encrypting the input
+            temp = string.ascii_letters[(string.letters.index(input_text[i]) + string.letters.index(key[j])) % 26]
+            #(for the line above) get the index of the current input character and the key, mod it by 26, and get the letter at the resulting index
+            if input_text[i].isupper():
+                output_text += temp.upper()
+            else:
+                output_text += temp
+        elif (input_text[i].isalpha() and (mode == "-d" or mode == "--decryption")): #if the current character is an alpha character and we are decrypting the input
+            temp = string.ascii_letters[(26 + string.letters.index(input_text[i]) - string.letters.index(key[j])) % 26]
+            #(for the line above) add 26 (to ensure the result is positive), get the index of the current input character minus the key,
+            #mod it by 26, and get the letter at the resulting index
+            if input_text[i].isupper():
+                output_text += temp.upper()
+            else:
+                output_text += temp
+        elif not input_text[i].isalpha(): #if the current character is not an alpha character
+            output_text += input_text[i] #simply add it to the output text since we do not encrypt/decrypt non-alpha characters          
 
-	print(asciiToStr(finArr))
-
-def decrypt(key, inString):
-	finArr = []
-
-	key = strToAscii(list(key))
-	inString = strToAscii(list(inString))
-
-	for i in range(0,len(inString)):
-		kval = i%len(key)
-		finArr.append((inString[i] - key[kval]) % alphabet_length)
-
-	print(asciiToStr(finArr))
-
-if (sys.argv[-2] == '-e' or sys.argv[-2] == '--encrypt'):
-	inString = input()
-	encrypt(sys.argv[-1], inString)
-
-elif (sys.argv[-2] == '-d' or sys.argv[-2] == '--decrypt'):
-	inString = input()
-	decrypt(sys.argv[-1], inString)
-
-else:
-	print("Invalid option, please try again.")
+        j += 1
+        j = j % len(key) #% length of the key so we can iterate over it multiple times
+    print output_text #print out the encrypted/decrypted message

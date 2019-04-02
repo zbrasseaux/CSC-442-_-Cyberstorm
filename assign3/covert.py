@@ -2,7 +2,7 @@ from ftplib import FTP
 dirList = []
 METHOD = 7
 
-
+#Method to convert incoming data into a binary format
 def conToBinary(filePermList):
     convertBinary = []
     for z in range(len(filePermList)):
@@ -12,24 +12,23 @@ def conToBinary(filePermList):
                 tempHolder = tempHolder + "0"
             else:
                 tempHolder = tempHolder + "1"
-        convertBinary.append(tempHolder)
-        
+        convertBinary.append(tempHolder)    
     #print " "
     #for f in range(len(convertBinary)):
-        #print convertBinary[f]
-        
+        #print convertBinary[f]  
     return convertBinary
 
+#Method to convert incoming binary data into it's integer form
 def conToInt(fullBinary):
     binaryInt = []
     for l in range(len(fullBinary)):
         binaryInt.append(int(fullBinary[l],2))
-        
     #print ""
     #for y in range(len(binaryInt)):
         #print binaryInt[y]
     return binaryInt
 
+#Converts integer number into corresponding ASCII character
 def conToASCII(binaryInt):
     ASCIIrep = [] 
     for u in range(len(binaryInt)):
@@ -38,22 +37,20 @@ def conToASCII(binaryInt):
     print ASCIIrep
     return ASCIIrep
 
+#Source for code testing, from the madlad himself
 ftp = FTP('jeangourd.com')
 ftp.login(user= 'anonymous', passwd = '')
 ftp.retrlines('LIST',dirList.append)
 ftp.quit()
 
-#for i in range(len(dirList)):
-    #print dirList[i]
-#print" "
-
+#Cuts incoming file data to strictly the permissions only
 filePermList = []
 for i in range(len(dirList)):
     #print dirList[i][0:10]
     filePermList.append(dirList[i][0:10])
     
 #############################################################################################################################
-    
+#7 BIT CODE
 if(METHOD == 7):
 ## Determines if there is a permission in first 3, marks to ignore if true
     errorCounter = 0
@@ -88,7 +85,9 @@ if(METHOD == 7):
     binaryInt = conToInt(fullBinary)
 #Runs method to convert integers to ASCII characters
     ASCII = conToASCII(binaryInt)
-
+    
+################################################################################################
+#10 BIT CODE
 elif(METHOD == 10):
     longString = []
     for r in range(len(filePermList)):
@@ -121,6 +120,9 @@ elif(METHOD == 10):
     binaryInt = conToInt(fullBinary)
 #Runs method to convert integers to ASCII characters
     ASCII = conToASCII(binaryInt)
+else:
+    print "Please enter a 7 or 10 into the METHOD variable, other values will not be accepted.
+    exit(0);
         
     
         

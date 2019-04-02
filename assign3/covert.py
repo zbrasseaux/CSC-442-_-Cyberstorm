@@ -70,7 +70,6 @@ if(METHOD == 7):
 ## Removes the files marked to be ignored  
     for t in range(errorCounter):
         filePermList.remove("ERRONEOUS")
-
 #Creates new list of files with only last 7 permissions included
     permList = []
     for o in range(len(filePermList)):
@@ -79,12 +78,9 @@ if(METHOD == 7):
     #print ""
     #for y in range(len(permList)):
         #print permList[y]
-#Runs method to convert list to binary    
-    fullBinary = conToBinary(permList)
-#Runs method to convert binary list to integer
-    binaryInt = conToInt(fullBinary)
-#Runs method to convert integers to ASCII characters
-    ASCII = conToASCII(binaryInt)
+    fullBinary = conToBinary(permList)  #Runs method to convert list to binary  
+    binaryInt = conToInt(fullBinary)    #Runs method to convert binary list to integer
+    ASCII = conToASCII(binaryInt)   #Runs method to convert integers to ASCII characters
     
 ################################################################################################
 #10 BIT CODE

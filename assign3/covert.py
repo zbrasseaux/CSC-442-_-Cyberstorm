@@ -22,9 +22,9 @@ def conToBinary(filePermList):
                 tempHolder = tempHolder + "1"
         convertBinary.append(tempHolder)
     if(PRINT == True):
-        print "\nBinary Format:"
+        print("\nBinary Format:")
         for f in range(len(convertBinary)):
-            print convertBinary[f]  
+            print(convertBinary[f])  
     return convertBinary
 
 #Method to convert incoming binary data into it's integer form
@@ -33,9 +33,9 @@ def conToInt(fullBinary):
     for l in range(len(fullBinary)):
         binaryInt.append(int(fullBinary[l],2))
     if(PRINT == True):
-        print "\nInteger Sum Format:"
+        print("\nInteger Sum Format:")
         for y in range(len(binaryInt)):
-            print binaryInt[y]
+            print(binaryInt[y])
     return binaryInt
 
 #Converts integer number into corresponding ASCII character
@@ -43,9 +43,9 @@ def conToASCII(binaryInt):
     ASCIIrep = [] 
     for u in range(len(binaryInt)):
         ASCIIrep.append(chr(binaryInt[u]))
-    print "\nASCII translation:"
-    print ASCIIrep
-    return ASCIIrep
+    print("\nASCII translation:")
+    print (ASCIIrep)
+    return (ASCIIrep)
 
 #Source for code testing, from the madlad himself
 ftp = FTP('jeangourd.com')
@@ -74,9 +74,9 @@ if(METHOD == 7):
                 errorCounter += 1
                 break
     if(PRINT == True):
-        print ""
+        print("")
         for l in range(len(filePermList)):
-            print filePermList[l]
+            print(filePermList[l])
             
 ## Removes the files marked to be ignored  
     for t in range(errorCounter):
@@ -87,9 +87,9 @@ if(METHOD == 7):
         permList.append(filePermList[o][3:10])
 #Prints a list of file permissions now formatted to last 7 bits
     if(PRINT == True):
-        print ""
+        print("")
         for y in range(len(permList)):
-            print permList[y]
+            print(permList[y])
     fullBinary = conToBinary(permList)  #Runs method to convert list to binary  
     binaryInt = conToInt(fullBinary)    #Runs method to convert binary list to integer
     ASCII = conToASCII(binaryInt)   #Runs method to convert integers to ASCII characters
@@ -101,8 +101,8 @@ elif(METHOD == 10):
     for r in range(len(filePermList)):
         longString.append(filePermList[r])
     if(PRINT == True):
-        print ""
-        print "String: {}".format(longString)
+        print("")
+        print("String: {}".format(longString))
 
 #Finds if the length is easily broken up into groups of 7, adds zeroes to the last one if not
     lengthString = len(longString)
@@ -114,12 +114,12 @@ elif(METHOD == 10):
         addValue = 8-modVal
         if(PRINT == True):
             print("Modulus is not 0, adding {} to final sequence...".format(addValue))
-            print longString[-1]
+            print(longString[-1])
             
         longString[-1] = ("-"*addValue) + longString[-1]
         
         if(PRINT == True):
-            print longString[-1]
+            print(longString[-1])
             print("\nNew String (still in list format): {}".format(longString))
             
     newString = ""
@@ -127,16 +127,16 @@ elif(METHOD == 10):
         newString += longString[n]
             
     if(PRINT == True):
-        print "New String in comprehensive format: {}".format(newString)
-        print "Length%7: {}".format(len(newString)%7)
+        print("New String in comprehensive format: {}".format(newString))
+        print("Length%7: {}".format(len(newString)%7))
 
     bit7Convert = []
     for v in range(len(newString)/7):
         bit7Convert.append(newString[(7*v):(7+(7*v))])
     if(PRINT == True):
-        print "\nConverted to bit7 format: "
+        print("\nConverted to bit7 format: ")
         for b in range(len(bit7Convert)):
-            print bit7Convert[b]
+            print(bit7Convert[b])
             
 #Runs method to convert list to binary    
     fullBinary = conToBinary(bit7Convert)
@@ -145,7 +145,7 @@ elif(METHOD == 10):
 #Runs method to convert integers to ASCII characters
     ASCII = conToASCII(binaryInt)
 else:
-    print "Please enter a 7 or 10 into the METHOD variable, other values will not be accepted."
+    print("Please enter a 7 or 10 into the METHOD variable, other values will not be accepted.")
     exit(0);
         
     

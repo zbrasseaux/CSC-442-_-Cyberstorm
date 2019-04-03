@@ -7,7 +7,7 @@
 
 from ftplib import FTP
 dirList = []
-METHOD = 10
+METHOD = 7
 PRINT = False
 
 #Method to convert incoming data into a binary format
@@ -44,7 +44,7 @@ def conToASCII(binaryInt):
     for u in range(len(binaryInt)):
         ASCIIrep.append(chr(binaryInt[u]))
     print("\nASCII translation:")
-    print (ASCIIrep)
+    print (''.join(ASCIIrep))
     return (ASCIIrep)
 
 #Source for code testing, from the madlad himself

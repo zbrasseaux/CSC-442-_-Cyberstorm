@@ -6,9 +6,7 @@
 #'''
 
 from ftplib import FTP
-dirList = []
-METHOD = 7
-PRINT = False
+METHOD = 10
 
 #Method to convert incoming data into a binary format
 def conToBinary(filePermList):
@@ -43,15 +41,24 @@ def conToASCII(binaryInt):
     ASCIIrep = [] 
     for u in range(len(binaryInt)):
         ASCIIrep.append(chr(binaryInt[u]))
-    print("\nASCII translation:")
+    #print("\nASCII translation:")
     print (''.join(ASCIIrep))
     return (ASCIIrep)
 
-#Source for code testing, from the madlad himself
-ftp = FTP('jeangourd.com')
-ftp.login(user= 'anonymous', passwd = '')
+
+dirList = []
+PATH = METHOD
+PRINT = False
+WEBSITE = 'jeangourd.com'
+USERNAME = 'anonymous'
+PASSWORD = ''
+
+ftp= FTP(WEBSITE)
+ftp.login(user= USERNAME, passwd = PASSWORD)
+ftp.cwd(str(PATH))
 ftp.retrlines('LIST',dirList.append)
 ftp.quit()
+
 
 #Cuts incoming file data to strictly the permissions only
 filePermList = []
@@ -100,6 +107,7 @@ elif(METHOD == 10):
     longString = []
     for r in range(len(filePermList)):
         longString.append(filePermList[r])
+        
     if(PRINT == True):
         print("")
         print("String: {}".format(longString))
@@ -130,6 +138,7 @@ elif(METHOD == 10):
         print("New String in comprehensive format: {}".format(newString))
         print("Length%7: {}".format(len(newString)%7))
 
+#Converts the now finished string of 10 bit to groups of 7 bits
     bit7Convert = []
     for v in range(len(newString)/7):
         bit7Convert.append(newString[(7*v):(7+(7*v))])

@@ -1,7 +1,0 @@
-FTP server on 138.47.148.167 port 8008
-user: spartans
-pass: keaimaakJDCBROHJodrcwscs
-
-Of course, pass must first be decrypted to login properly.  It is encrypted using a Vigenere cipher with the following key:
-"spartans rock your world"
-

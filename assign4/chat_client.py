@@ -1,8 +1,19 @@
+'''
+Team Celtics
+
+Link to private GitHub:
+https://github.com/zbrasseaux/CSC-442-_-Cyberstorm
+
+If you need access to it, please email any of out members.
+'''
+
 import socket
 from time import time
 import sys
 import binascii
 
+
+# For best results use wired connection
 
 address = 'www.jeangourd.com'
 port = 31337
@@ -15,8 +26,6 @@ s.connect((address, port))
 
 data = s.recv(4096)
 
-# print(data)
-
 while (data.rstrip("\n") != "EOF"):
 	sys.stdout.write(data)
 	sys.stdout.flush()
@@ -27,9 +36,7 @@ while (data.rstrip("\n") != "EOF"):
 
 	delta = round(t1 - t0, 3)
 
-	# print(delta)
-
-	if (delta >= .08):
+	if (delta >= .07): # can be changed in the future to improve accuracy
 		covert_bin += "1"
 	else:
 		covert_bin += "0"
@@ -38,11 +45,11 @@ s.close()
 
 i = 0
 while (i < len(covert_bin)):
+
 	# process one byte at a time
 	b = covert_bin[i:i + 8]
 	# convert it to ASCII
 	n = int("0b{}".format(b), 2)
-
 
 	try:
 		covert += binascii.unhexlify("{0:x}".format(n))
@@ -52,5 +59,4 @@ while (i < len(covert_bin)):
 	# stop at the string "EOF"
 	i += 8
 
-print(covert)
-print(covert_bin)
+print(covert.rstrip("EOF?"))

@@ -4,8 +4,13 @@
 #https://github.com/zbrasseaux/CSC-442-_-Cyberstorm
 #If you need access to it, please email any of out members.
 #'''
-
 from ftplib import FTP
+
+PATH = '/.lookee-here/now-in-here'
+PRINT = False
+WEBSITE = '138.47.148.167'
+USERNAME = 'spartans'
+PASSWORD = 'spartansSPARTANSspartans'
 METHOD = 10
 
 #Method to convert incoming data into a binary format
@@ -47,21 +52,12 @@ def conToASCII(binaryInt):
 
 
 dirList = []
-PATH = '/.lookee-here/now-in-here'
-PRINT = False
-WEBSITE = '138.47.148.167'
-USERNAME = 'spartans'
-PASSWORD = 'spartansSPARTANSspartans'
-
 ftp = FTP()
-
 ftp.connect(WEBSITE, 8008)
-
 ftp.login(user= USERNAME, passwd = PASSWORD)
 ftp.cwd(str(PATH))
 ftp.retrlines('LIST',dirList.append)
 ftp.quit()
-
 
 #Cuts incoming file data to strictly the permissions only
 filePermList = []

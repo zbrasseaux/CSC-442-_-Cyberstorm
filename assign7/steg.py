@@ -40,36 +40,40 @@ def store():
 def retrieve():
 	return 1
 
+flag = ''
+
 # parser to set/change different values
 for i in sys.argv[1:]:
 	temp = list(i)
+
+	flag = ''.join(temp[0:2])
 
 	# help menu
 	if (i == '--help'):
 		help()
 	# store mode
-	elif (temp[1] == 's'):
+	elif (flag == '-s'):
 		mode = 0
 	# retrieve mode
-	elif (temp[1] == 'r'):
+	elif (flag == '-r'):
 		mode = 1
 	# bit method
-	elif (temp[1] == 'b'):
+	elif (flag == '-b'):
 		method =0
 	# byte method
-	elif (temp[1] == 'B'):
+	elif (flag == '-B'):
 		method = 1
 	# offset value
-	elif (temp[1] == 'o'):
+	elif (flag == '-o'):
 		offset = int(''.join(temp[2:]))
 	# change default inverval value
-	elif (temp[1] == 'i'):
+	elif (flag == '-i'):
 		interval = int(''.join(temp[2:]))
 	# declare hidden file
-	elif (temp[1] == 'h'):
+	elif (flag == '-h'):
 		hiddenFile = ''.join(temp[2:])
 	# declare wrapper file
-	elif (temp[1] == 'w'):
+	elif (flag == '-w'):
 		wrapper = ''.join(temp[2:])
 
 	# catch-all error statement for invalid options

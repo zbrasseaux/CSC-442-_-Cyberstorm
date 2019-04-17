@@ -2,6 +2,11 @@
 
 import sys
 
+####### Error Codes #######
+# 0 : Exited with no issues
+# 1 : Invalid flag
+# 2 : No mode set
+
 # interval defaults to 1
 interval = 1
 
@@ -28,6 +33,12 @@ def test():
 	print('Offset : ' + str(offset))
 	print('Hidden File : ' + hiddenFile)
 	print('Wrapper : ' + wrapper)
+
+def store():
+	return 0
+
+def retrieve():
+	return 1
 
 # parser to set/change different values
 for i in sys.argv[1:]:
@@ -67,4 +78,20 @@ for i in sys.argv[1:]:
 			", please try again, or use --help for more options.\n")
 		exit(1)
 
-test()
+# runs retrieve or store based on the mode
+# includes error handling for errors that I encountered
+try:
+	if (mode == 1):
+		retrieve()
+	elif (mode == 0):
+		store()
+except IndexError:
+	sys.stderr.write("Invalid mode... Exiting with error code 2...\n")
+	exit(2)
+except NameError:
+	sys.stderr.write\
+	("Mode (store/retrieve) not set, please try again or see '--help' for more options.\n")
+	exit(2)
+
+# Program exits successfully
+exit(0)

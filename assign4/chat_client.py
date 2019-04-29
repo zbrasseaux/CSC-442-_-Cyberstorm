@@ -44,8 +44,12 @@ while (data.rstrip("\n") != "EOF"):
 	# rounds the time to 3 decimal places
 	delta = round(t1 - t0, 3)
 
+<<<<<<< HEAD
 	# determines a one or a zero for the time
 	if (delta >= .07): # can be changed in the future to improve accuracy
+=======
+	if (delta >= .095): # can be changed in the future to improve accuracy
+>>>>>>> 9c079fc6676f4c298599b1594ea56e56e39b921e
 		covert_bin += "1"
 	else:
 		covert_bin += "0"

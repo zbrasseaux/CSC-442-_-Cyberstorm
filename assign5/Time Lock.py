@@ -4,6 +4,7 @@
 #                 Trenton Choate, Richard Lebell, Paige Meeks
 # Desc: This program is designed to take in an epoch time and create a password
 #       based on the difference of these times.
+# Note: To run, you'll need to use python3
 ###################################################################################
 
 import time

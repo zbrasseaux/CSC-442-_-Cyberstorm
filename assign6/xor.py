@@ -22,4 +22,4 @@ with open("key2", "rb") as f:
 
 
 decrypted = [ chr(ord(a) ^ ord(b)) for (a,b) in zip(byteList1, byteList2) ]
-print "".join(decrypted)
+print("".join(decrypted))

@@ -7,14 +7,11 @@
 # Note: To run, you'll need to use python3
 ###################################################################################
 
-import time
 import sys
 import datetime
 import hashlib
 import calendar
-from pytz import timezone
 import pytz
-import os.path
 
 ##################################################################################
 # Functions

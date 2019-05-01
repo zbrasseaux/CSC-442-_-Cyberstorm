@@ -2,12 +2,13 @@
 
 import sys
 from PIL import Image
+import binascii
 
 ####### Error Codes #######
 # 0 : Exited with no issues
 # 1 : Invalid flag
-<<<<<<< HEAD
 # 2 : No MODE set
+# 3 : No METHOD set
 
 # global var declarations
 
@@ -20,12 +21,12 @@ METHOD = ''
 OFFSET = ''
 WRAPPER_FILE = ''
 HIDDEN_FILE = ''
-=======
+
 # 2 : No mode set
 
 # interval defaults to 1
 interval = 1
->>>>>>> 9c079fc6676f4c298599b1594ea56e56e39b921e
+
 
 def help():
 	'''help fxn that gives the usage and options'''
@@ -42,90 +43,74 @@ def help():
 	sys.stdout.write("\n\t--help\t  Display this message\n")
 	exit(0)
 
+def file_to_bin(inFile):
+	'''Function for converting an input file into raw binary'''
+	sys.stdout.write("Converting " + inFile + " to binary.\n")
+	out_bin = []
+	with open(inFile, "rb") as file:
+		byte = file.read(1)
+		while (byte != ''):
+			try:
+				out_bin.append(bin(int(binascii.hexlify(byte), 16))[2:].zfill(8))
+				# print(wrapper_bin)
+				byte = file.read(1)
+			except ValueError:
+				break
+
+	return out_bin
+
 def test():
-<<<<<<< HEAD
 	'''some code to test that the different flags work'''
-	print('Mode : ' + str(MODE))
-	print('Method : ' + str(METHOD))
-	print('Interval : ' + str(INTERVAL))
-	print('Offset : ' + str(OFFSET))
-	print('Hidden File : ' + HIDDEN_FILE)
-	print('Wrapper : ' + WRAPPER_FILE)
-=======
+
 	print('Mode : ' + str(mode))
-	print('Method : ' + str(method))
+
+	try:
+		print('Method : ' + str(method))
+	except NameError:
+		print("Method : Not set")
+
 	print('Interval : ' + str(interval))
-	print('Offset : ' + str(offset))
-	print('Hidden File : ' + hiddenFile)
-	print('Wrapper : ' + wrapper)
->>>>>>> 9c079fc6676f4c298599b1594ea56e56e39b921e
+
+	try:
+		print('Offset : ' + str(offset))
+	except NameError:
+		print("Offset : Not set")
+
+	try:
+		print('Hidden File : ' + hiddenFile)
+	except NameError:
+		print("Hidden File : Not set")
+
+	try:
+		print('Wrapper : ' + wrapper)
+	except NameError:
+		print("Wrapper : Not set")
 
 def store():
 	return 0
 
 def retrieve():
-	return 1
-<<<<<<< HEAD
-	
+	wrapper_bin = file_to_bin(wrapper)[offset:]
+
+	sys.stdout.write("Converting to arrays of binary.\n")
+
+	for byte in wrapper_bin:
+		print(byte)
+
+	# print(wrapper_bin)
+
+	if (method == 1): # Byte method
+		return 0
+	elif (method == 0): # Bit method
+		return 0
+	else:
+		sys.stderr.write\
+		("Method (bit/byte) not set, please try again or see '--help' for more options.")
+
+	# sys.stdout.write(binArr)
+
 
 ##### Main Program #####
-
-def main():
-	'''parser to set/change different values'''
-	for i in sys.argv[1:]:
-		temp = list(i)
-
-		FLAG = ''.join(temp[0:2])
-
-		# help menu
-		if (i == '--help'):
-			help()
-		# store MODE
-		elif (FLAG == '-s'):
-			MODE = 0
-		# retrieve MODE
-		elif (FLAG == '-r'):
-			MODE = 1
-		# bit METHOD
-		elif (FLAG == '-b'):
-			METHOD =0
-		# byte METHOD
-		elif (FLAG == '-B'):
-			METHOD = 1
-		# OFFSET value
-		elif (FLAG == '-o'):
-			OFFSET = int(''.join(temp[2:]))
-		# change default inverval value
-		elif (FLAG == '-i'):
-			INTERVAL = int(''.join(temp[2:]))
-		# declare hidden file
-		elif (FLAG == '-h'):
-			HIDDEN_FILE = ''.join(temp[2:])
-		# declare WRAPPER_FILE file
-		elif (FLAG == '-w'):
-			WRAPPER_FILE = ''.join(temp[2:])
-
-		# catch-all error statement for invalid options
-		else:
-			sys.stderr.write("Invalid option : " + i + \
-				", please try again, or use --help for more options.\n")
-			exit(1)
-
-	# runs retrieve or store based on the MODE
-	# includes error handling for errors that I encountered
-
-	try:
-		if (MODE == 1):
-			retrieve()
-		elif (MODE == 0):
-			store()
-	except NameError:
-		sys.stderr.write\
-		("Mode (store/retrieve) not set, please try again or see '--help' for more options.\n")
-		exit(2)
-
-main()
-=======
 
 flag = ''
 
@@ -169,6 +154,8 @@ for i in sys.argv[1:]:
 			", please try again, or use --help for more options.\n")
 		exit(1)
 
+test()
+
 # runs retrieve or store based on the mode
 # includes error handling for errors that I encountered
 try:
@@ -184,6 +171,7 @@ except NameError:
 	("Mode (store/retrieve) not set, please try again or see '--help' for more options.\n")
 	exit(2)
 
->>>>>>> 9c079fc6676f4c298599b1594ea56e56e39b921e
+# test()
+
 # Program exits successfully
 exit(0)

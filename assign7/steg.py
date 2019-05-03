@@ -1,17 +1,30 @@
 #!/usr/bin/env python
 
+
+'''I am currently running the command python steg.py -B -r -o1024 -i8 -wstegged-byte.bmp >> test.txt so I can the the entirety of the output'''
 import sys
+import binascii
+import os
 
 ####### Error Codes #######
 # 0 : Exited with no issues
 # 1 : Invalid flag
-# 2 : No mode set
+# 2 : No MODE set
+# 3 : No METHOD set
 
-# interval defaults to 1
+DEBUG = False
+
+# global var declarations
 interval = 1
+sentinelInt = [0, 255, 0, 0, 255, 0]
+sentinel = bytearray(sentinelInt)
+# print(type(sentinel[0]))
 
-# help fxn that gives the usage and options
+def printr(h):
+	sys.stdout.buffer.write(bytes([h]))
+
 def help():
+	'''help fxn that gives the usage and options'''
 	sys.stdout.write\
 	("Usage: 'python steg.py -(bB) -(sr) -o<val> [-i<val>] -w<val> [-h<val>]'\n\n")
 	sys.stdout.write("\t-b\t  Use the bit method\n")
@@ -25,20 +38,164 @@ def help():
 	sys.stdout.write("\n\t--help\t  Display this message\n")
 	exit(0)
 
-# some code to test that the different flags work
-def test():
-	print('Mode : ' + str(mode))
-	print('Method : ' + str(method))
-	print('Interval : ' + str(interval))
-	print('Offset : ' + str(offset))
-	print('Hidden File : ' + hiddenFile)
-	print('Wrapper : ' + wrapper)
+def file_to_bin(inFile):
+	'''Function for converting an input file into raw binary'''
+	sys.stdout.write("Converting " + inFile + " to binary.\n")
+	out_bin = []
+	with open(inFile, "rb") as file:
+		data = file.read()
+		out_bin = bytearray(data)
+		# print(out_bin[0])
+	return out_bin
 
+#store (-s) a hidden image within an image
 def store():
-	return 0
+		
+	wrap = open(wrapper, 'rb')
+	hide = open(hiddenFile, 'rb')
 
+	h_size = os.path.getsize(hiddenFile)
+	# Get sizes of file to hide
+	w_size = os.path.getsize(wrapper)
+
+	if ((method == 1) and (h_size * interval + offset + 6) > w_size):
+		print("Wrapper too small, must be at least " + str(h_size * interval + offset + 6) + " bytes")
+		exit()
+	elif ((method == 0) and (h_size * interval * 8 + offset + 6 * 8) > w_size):
+		print("Wrapper too small, must be at least " + str(h_size * interval + offset + 6) + " bytes")
+		exit()
+	# Make sure given wrapper is large enough to store the hidden file inside
+		
+	# At this point, ready to hide file
+	sys.stdout.buffer.write(wrap.read(offset))         # Print header
+	sys.stdout.flush()
+
+	if (method == 1):
+		# Using byte method
+
+		for i in range(h_size):
+			sys.stdout.flush()                 # flush it
+			printr(ord(hide.read(1)))          # print a byte of the hidden file
+			wrap.seek(wrap.tell() + 1)         # skip a byte of the wrapper
+			for j in range(interval):            # 
+				printr(ord(wrap.read(1)))  # print 'i' bytes of the wrapper
+
+		for i in range(6):
+			sys.stdout.flush()                    # flush it
+			printr(sentinel[i])                   # print raw byte of sentinel
+			wrap.seek(wrap.tell() + 1)            # skip a byte of the wrapper
+			for j in range(interval):               # 
+				printr(ord(wrap.read(1)))     # print 'i' bytes of the wrapper
+			
+		next_byte = wrap.read(1)                   #
+		while next_byte != b'':                    #
+			sys.stdout.flush()                 #
+			printr(ord(next_byte))             #
+			next_byte = wrap.read(1)           # print the rest of the wrapper
+	else:
+		# Using bit method
+
+		for i in range(h_size):                           #
+			sys.stdout.flush()                        # Flush it
+			h = ord(hide.read(1))                     # Get next byte to hide
+			for j in range(8):                        # 
+				w = ord(wrap.read(1))             # ^ Read next wrapper byte
+				w &= 0b11111110                   # ^ Set LSB to 0
+				w |= ((h & 0b10000000) >> 7)      # ^ Shift MSB of h to LSB of w
+				printr(w)                         # ^ Print raw byte
+				h <<= 1                           # ^ Shift in next byte of h
+				sys.stdout.buffer.write(wrap.read(interval)) # Skip interval
+				sys.stdout.flush()
+
+		for i in range(6):                                #
+			sys.stdout.flush()                        # Flush it
+			h = sentinel[i]                           # Get next byte of sentinel
+			for j in range(8):                        # 
+				w = ord(wrap.read(1))             # ^
+				w &= 0b11111110                   # ^
+				w |= ((h & 0b10000000) >> 7)      # ^
+				printr(w)                         # ^
+				h <<= 1                           # ^
+				sys.stdout.buffer.write(wrap.read(interval)) # Skip interval
+				sys.stdout.flush()
+			
+		next_byte = wrap.read(1)                   #
+		while next_byte != b'':                    #
+			sys.stdout.flush()                 #
+			printr(ord(next_byte))             #
+			next_byte = wrap.read(1)           # print the rest of the wrapper
+	# except NameError:
+	# 	print("Hidden file not set.")
+	# 	exit()
+
+#retrieve (-r) a hidden image from an image
 def retrieve():
-	return 1
+	wrapper_bin = file_to_bin(wrapper)[offset:]
+	if(DEBUG):
+		for b in wrapper_bin:
+			print(b)
+	wrapLength = len(wrapper_bin)
+	wrapIndex = 0
+	if(DEBUG):
+		print(len(wrapper_bin))
+	hiddenFile = []
+	possibleSentinel = [0] * 6
+	senIndex = 0
+	senLegth = len(sentinel)
+
+	sys.stdout.write("Converting to arrays of binary.\n")
+
+	if (method == 1): # Byte method
+		while (possibleSentinel != sentinel): #while we haven't found the sentinel
+			while(senIndex < senLegth):
+				if(wrapIndex + interval >= wrapLength): #we did not find the sentinel before EOF
+					print("Sentinel was not found... assuming there was no hidden data and exitting...")
+					exit(0)
+				else:
+					wrapByte = wrapper_bin[wrapIndex]
+					if(DEBUG):
+						print(possibleSentinel)
+						print("%s - %s" % (wrapByte, sentinel[senIndex]))
+					wrapIndex += interval
+					if(wrapByte == sentinel[senIndex]):
+						possibleSentinel[senIndex] = wrapByte
+						senIndex += 1
+					else:
+						possibleSentinel = [0] * 6
+						senIndex = 0
+					hiddenFile.append(wrapByte)
+			###########################
+		hiddenFile = hiddenFile[:len(hiddenFile)-senLegth]
+		print("CONGRATS")
+
+	elif (method == 0): # Bit method
+		while (possibleSentinel != sentinel): #while we haven't found the sentinel
+			wrapByte = 0
+			for i in range(8):
+				if(wrapIndex + interval >= wrapLength | wrapIndex >= wrapLength): #we did not find the sentinel before EOF
+					print("Sentinel was not found... assuming there was no hidden data and exitting...")
+					exit(0)
+				else:
+					wrapper_bin[wrapIndex] &= 1
+					wrapper_bin[wrapIndex] <<= (7 - i)
+					wrapByte |= wrapper_bin[wrapIndex]
+					wrapIndex += interval
+			###########################
+			if(wrapByte == sentinel[senIndex]):
+				possibleSentinel[senIndex] = wrapByte
+				senIndex += 1
+			else:
+				possibleSentinel = [0] * 6
+				senIndex = 0
+			hiddenFile.append(wrapByte)
+		hiddenFile = hiddenFile[:len(hiddenFile)-senLegth]
+		print("CONGRATS")
+	else:
+		sys.stderr.write\
+		("Method (bit/byte) not set, please try again or see '--help' for more options.\n")
+		exit(3)
+
+#################################################################################################################### Main Program #####
 
 flag = ''
 
@@ -65,7 +222,8 @@ for i in sys.argv[1:]:
 		method = 1
 	# offset value
 	elif (flag == '-o'):
-		offset = int(''.join(temp[2:]))
+		val = ''.join(temp[2:])
+		offset = int(val)
 	# change default inverval value
 	elif (flag == '-i'):
 		interval = int(''.join(temp[2:]))
@@ -82,20 +240,22 @@ for i in sys.argv[1:]:
 			", please try again, or use --help for more options.\n")
 		exit(1)
 
+print(hiddenFile)
+
 # runs retrieve or store based on the mode
 # includes error handling for errors that I encountered
-try:
-	if (mode == 1):
-		retrieve()
-	elif (mode == 0):
-		store()
-except IndexError:
-	sys.stderr.write("Invalid mode... Exiting with error code 2...\n")
-	exit(2)
-except NameError:
-	sys.stderr.write\
-	("Mode (store/retrieve) not set, please try again or see '--help' for more options.\n")
-	exit(2)
+# try:
+if (mode == 1):
+	retrieve()
+elif (mode == 0):
+	store()
+# except IndexError:
+# 	sys.stderr.write("Invalid mode... exitting with error code 2...\n")
+# 	exit(2)
+# except NameError:
+# 	sys.stderr.write\
+# 	("Mode (store/retrieve) not set, please try again or see '--help' for more options.\n")
+# 	exit(2)
 
 # Program exits successfully
 exit(0)

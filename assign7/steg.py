@@ -105,7 +105,7 @@ def retrieve():
 			print(b)
 	wrapLength = len(wrapper_bin)
 	#wrapIndex 
-	wrapIndex = wrapLength - offset
+	wrapIndex = 0
 	if(DEBUG):
 		print("LENGTH OF WRAPPER")
 		print(len(wrapper_bin))
@@ -125,7 +125,7 @@ def retrieve():
 		while (possibleSentinel != sentinel):
 			while(senIndex < senLegth):
 				#we did not find the sentinel before EOF
-				if(wrapIndex - interval <= 0):
+				if(wrapIndex + interval >= wrapLength):
 					print("Sentinel was not found... assuming there was no hidden data and exitting...")
 					exit(0)
 				#not EOF yet
@@ -133,8 +133,9 @@ def retrieve():
 					#get the byte at the current index			
 					wrapByte = wrapper_bin[wrapIndex]
 					if(DEBUG):
+						print(possibleSentinel)
 						print("%s - %s" % (wrapByte, sentinel[senIndex]))
-					wrapIndex -= interval
+					wrapIndex += interval
 					#if the byte matches the sentinel
 					if(wrapByte == sentinel[senIndex]):
 						# print("MATCH...")
@@ -162,7 +163,7 @@ def retrieve():
 			wrapByte = 0
 			for i in range(8):
 				#we did not find the sentinel before EOF
-				if(wrapIndex - interval <= 0 | wrapIndex <= 0):
+				if(wrapIndex + interval >= wrapLength | wrapIndex >= wrapLength):
 					print("Sentinel was not found... assuming there was no hidden data and exitting...")
 					exit(0)
 				#not EOF yet

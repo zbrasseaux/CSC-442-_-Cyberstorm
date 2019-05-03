@@ -113,6 +113,7 @@ def retrieve():
 		while (possibleSentinel != sentinel): #while we haven't found the sentinel
 			while(psenIndex < senLegth):
 				if(wrapIndex + interval >= wrapLength):
+					del hiddenFile[:]
 					print("Sentinel was not found... assuming there was no hidden data and exitting...")
 					exit(0)
 				else:
@@ -120,7 +121,12 @@ def retrieve():
 					if(wrapByte == sentinel[psenIndex]):
 						possibleSentinel.append(wrapByte)
 						psenIndex += 1
-						
+					else:
+						psenIndex = 0
+					hiddenFile.append(wrapByte)
+			###########################
+		hiddenFile = hiddenFile[:len(hiddenFile)-senLegth]
+
 
 	elif (method == 0): # Bit method
 		return 0

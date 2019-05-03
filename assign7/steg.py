@@ -20,7 +20,7 @@ sentinelInt = [0, 255, 0, 0, 255, 0]
 sentinel = bytearray(sentinelInt)
 # print(type(sentinel[0]))
 
-def printr(h):
+def asciiout(h):
 	sys.stdout.buffer.write(bytes([h]))
 
 def help():
@@ -51,82 +51,87 @@ def file_to_bin(inFile):
 #store (-s) a hidden image within an image
 def store():
 		
+	# open files
 	wrap = open(wrapper, 'rb')
 	hide = open(hiddenFile, 'rb')
 
-	h_size = os.path.getsize(hiddenFile)
-	# Get sizes of file to hide
-	w_size = os.path.getsize(wrapper)
+	# Get size of file to hide
+	head_len = os.path.getsize(hiddenFile)
+	# Get sizes of file to wrap the hidden in
+	wrap_len = os.path.getsize(wrapper)
 
-	if ((method == 1) and (h_size * interval + offset + 6) > w_size):
-		print("Wrapper too small, must be at least " + str(h_size * interval + offset + 6) + " bytes")
+	# check to see if wrapper can hold the file
+	if ((method == 1) and (head_len * interval + offset + 6) > wrap_len):
+		print("Wrapper too small, must be at least " \
+			+ str(head_len * interval + offset + 6) + " bytes")
 		exit()
-	elif ((method == 0) and (h_size * interval * 8 + offset + 6 * 8) > w_size):
-		print("Wrapper too small, must be at least " + str(h_size * interval + offset + 6) + " bytes")
+	elif ((method == 0) and (head_len * interval * 8 + offset + 6 * 8) > wrap_len):
+		print("Wrapper too small, must be at least " \
+			+ str(head_len * interval + offset + 6) + " bytes")
 		exit()
-	# Make sure given wrapper is large enough to store the hidden file inside
-		
-	# At this point, ready to hide file
-	sys.stdout.buffer.write(wrap.read(offset))         # Print header
+
+	# print the header
+	sys.stdout.buffer.write(wrap.read(offset)) 
+
 	sys.stdout.flush()
 
+	# Using byte method
 	if (method == 1):
-		# Using byte method
-
-		for i in range(h_size):
-			sys.stdout.flush()                 # flush it
-			printr(ord(hide.read(1)))          # print a byte of the hidden file
-			wrap.seek(wrap.tell() + 1)         # skip a byte of the wrapper
-			for j in range(interval):            # 
-				printr(ord(wrap.read(1)))  # print 'i' bytes of the wrapper
+		for i in range(0, head_len):
+			sys.stdout.flush()                
+			asciiout(ord(hide.read(1)))        
+			wrap.seek(wrap.tell() + 1)     
+			for j in range(interval): 
+				asciiout(ord(wrap.read(1)))  
 
 		for i in range(6):
-			sys.stdout.flush()                    # flush it
-			printr(sentinel[i])                   # print raw byte of sentinel
-			wrap.seek(wrap.tell() + 1)            # skip a byte of the wrapper
-			for j in range(interval):               # 
-				printr(ord(wrap.read(1)))     # print 'i' bytes of the wrapper
+			sys.stdout.flush()                
+			asciiout(sentinel[i])           
+			wrap.seek(wrap.tell() + 1)  
+			for j in range(interval):    
+				asciiout(ord(wrap.read(1))) 
 			
-		next_byte = wrap.read(1)                   #
-		while next_byte != b'':                    #
-			sys.stdout.flush()                 #
-			printr(ord(next_byte))             #
-			next_byte = wrap.read(1)           # print the rest of the wrapper
+		next_byte = wrap.read(1)   
+		while next_byte != b'': 
+			sys.stdout.flush()     
+			asciiout(ord(next_byte))  
+			next_byte = wrap.read(1)
+
+	# Using bit method
 	else:
-		# Using bit method
-
-		for i in range(h_size):                           #
-			sys.stdout.flush()                        # Flush it
-			h = ord(hide.read(1))                     # Get next byte to hide
-			for j in range(8):                        # 
-				w = ord(wrap.read(1))             # ^ Read next wrapper byte
-				w &= 0b11111110                   # ^ Set LSB to 0
-				w |= ((h & 0b10000000) >> 7)      # ^ Shift MSB of h to LSB of w
-				printr(w)                         # ^ Print raw byte
-				h <<= 1                           # ^ Shift in next byte of h
-				sys.stdout.buffer.write(wrap.read(interval)) # Skip interval
+		for i in range(0, head_len):           
+			sys.stdout.flush()             
+			h = ord(hide.read(1))               
+			for j in range(8):    
+				# read the next wrapper bit            
+				w = ord(wrap.read(1))             
+				w &= 0b11111110                 
+				w |= ((h & 0b10000000) >> 7)     
+				asciiout(w)                     
+				h = h + 1   
+				# output ascii
+				sys.stdout.buffer.write(wrap.read(interval))
 				sys.stdout.flush()
 
-		for i in range(6):                                #
-			sys.stdout.flush()                        # Flush it
-			h = sentinel[i]                           # Get next byte of sentinel
-			for j in range(8):                        # 
-				w = ord(wrap.read(1))             # ^
-				w &= 0b11111110                   # ^
-				w |= ((h & 0b10000000) >> 7)      # ^
-				printr(w)                         # ^
-				h <<= 1                           # ^
-				sys.stdout.buffer.write(wrap.read(interval)) # Skip interval
+		for i in range(6):                    
+			sys.stdout.flush()          
+			h = sentinel[i]                    
+			for j in range(8):    
+				# read the next wrapper bit            
+				w = ord(wrap.read(1))        
+				w &= 0b11111110              
+				w |= ((h & 0b10000000) >> 7)   
+				asciiout(w)      
+				h = h + 1     
+				# output ascii     
+				sys.stdout.buffer.write(wrap.read(interval)) 
 				sys.stdout.flush()
 			
-		next_byte = wrap.read(1)                   #
-		while next_byte != b'':                    #
-			sys.stdout.flush()                 #
-			printr(ord(next_byte))             #
-			next_byte = wrap.read(1)           # print the rest of the wrapper
-	# except NameError:
-	# 	print("Hidden file not set.")
-	# 	exit()
+		next_byte = wrap.read(1)     
+		while next_byte != b'':     
+			sys.stdout.flush()      
+			asciiout(ord(next_byte))    
+			next_byte = wrap.read(1)
 
 #retrieve (-r) a hidden image from an image
 def retrieve():
@@ -195,7 +200,7 @@ def retrieve():
 		("Method (bit/byte) not set, please try again or see '--help' for more options.\n")
 		exit(3)
 
-#################################################################################################################### Main Program #####
+##### Main Program #####
 
 flag = ''
 
@@ -239,8 +244,6 @@ for i in sys.argv[1:]:
 		sys.stderr.write("Invalid option : " + i + \
 			", please try again, or use --help for more options.\n")
 		exit(1)
-
-print(hiddenFile)
 
 # runs retrieve or store based on the mode
 # includes error handling for errors that I encountered

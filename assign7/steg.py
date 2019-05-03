@@ -111,16 +111,16 @@ def retrieve():
 
 	if (method == 1): # Byte method
 		while (possibleSentinel != sentinel): #while we haven't found the sentinel
-			while(senIndex < senLegth):
+			while(psenIndex < senLegth):
 				if(wrapIndex + interval >= wrapLength):
 					print("Sentinel was not found... assuming there was no hidden data and exitting...")
 					exit(0)
 				else:
 					wrapIndex += interval
-					if(wrapByte == sentinel[senIndex]):
+					if(wrapByte == sentinel[psenIndex]):
 						possibleSentinel.append(wrapByte)
-						senIndex += 1
-		return 0
+						psenIndex += 1
+						
 
 	elif (method == 0): # Bit method
 		return 0

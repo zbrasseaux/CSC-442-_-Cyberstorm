@@ -23,7 +23,7 @@ HIDDEN_FILE = ''
 
 interval = INTERVAL
 
-sentinel = [00000000, 11111111, 00000000, 00000000, 11111111, 00000000]
+sentinel = ['00000000', '11111111', '00000000', '00000000', '11111111', '00000000']
 
 def help():
 	'''help fxn that gives the usage and options'''
@@ -98,38 +98,36 @@ def retrieve():
 	wrapper_bin = file_to_bin(wrapper)[offset:]
 	wrapLength = len(wrapper_bin)
 	wrapIndex = 0
-	wrapByte = wrapper_bin[wrapIndex]
 	if(DEBUG):
 		print(len(wrapper_bin))
-
 	hiddenFile = []
 	possibleSentinel = []
-	psenIndex = 0
+	senIndex = 0
 	senLegth = len(sentinel)
 
 	sys.stdout.write("Converting to arrays of binary.\n")
 
 	if (method == 1): # Byte method
 		while (possibleSentinel != sentinel): #while we haven't found the sentinel
-			while(psenIndex < senLegth):
-				if(wrapIndex + interval >= wrapLength):
-					del hiddenFile[:]
+			while(senIndex < senLegth):
+				if(wrapIndex + interval >= wrapLength): #we did not find the sentinel before EOF
 					print("Sentinel was not found... assuming there was no hidden data and exitting...")
 					exit(0)
 				else:
+					wrapByte = wrapper_bin[wrapIndex]
 					wrapIndex += interval
-					if(wrapByte == sentinel[psenIndex]):
+					if(wrapByte == sentinel[senIndex]):
 						possibleSentinel.append(wrapByte)
-						psenIndex += 1
+						senIndex += 1
 					else:
-						psenIndex = 0
+						del possibleSentinel[:]
+						senIndex = 0
 					hiddenFile.append(wrapByte)
 			###########################
 		hiddenFile = hiddenFile[:len(hiddenFile)-senLegth]
 
-
 	elif (method == 0): # Bit method
-		return 0
+		pass
 	else:
 		sys.stderr.write\
 		("Method (bit/byte) not set, please try again or see '--help' for more options.\n")

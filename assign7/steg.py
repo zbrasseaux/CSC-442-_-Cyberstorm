@@ -10,7 +10,7 @@ from PIL import Image
 # 2 : No MODE set
 # 3 : No METHOD set
 
-DEBUG = False
+DEBUG = True
 
 # global var declarations
 FLAG = ''
@@ -23,7 +23,8 @@ HIDDEN_FILE = ''
 
 interval = INTERVAL
 
-sentinel = ['00000000', '11111111', '00000000', '00000000', '11111111', '00000000']
+sentinelInt = [0, 255, 0, 0, 255, 0]
+sentinel = bytearray(sentinelInt)
 
 def help():
 	'''help fxn that gives the usage and options'''
@@ -45,18 +46,9 @@ def file_to_bin(inFile):
 	sys.stdout.write("Converting " + inFile + " to binary.\n")
 	out_bin = []
 	with open(inFile, "rb") as file:
-		byte = file.read(1)
-		while (byte != ''):
-			try:
-				out_bin.append(bin(int(binascii.hexlify(byte), 16))[2:].zfill(8))
-				byte = file.read(1)
-			except ValueError:
-				sys.stderr.write\
-				("An error has occurred while converting the image to binary... exitting with error code 1...\n")
-				exit(1)
-		###########################
-	if(DEBUG):
-		print(len(out_bin))
+		data = file.read()
+		out_bin = bytearray(data)
+		print(out_bin[0])
 	return out_bin
 
 #store (-s) a hidden image within an image
@@ -96,12 +88,15 @@ def store():
 #retrieve (-r) a hidden image from an image
 def retrieve():
 	wrapper_bin = file_to_bin(wrapper)[offset:]
+	# if(DEBUG):
+	# 	for b in wrapper_bin:
+	# 		print(b)
 	wrapLength = len(wrapper_bin)
 	wrapIndex = 0
 	if(DEBUG):
 		print(len(wrapper_bin))
 	hiddenFile = []
-	possibleSentinel = []
+	possibleSentinel = [0] * 6
 	senIndex = 0
 	senLegth = len(sentinel)
 
@@ -115,16 +110,20 @@ def retrieve():
 					exit(0)
 				else:
 					wrapByte = wrapper_bin[wrapIndex]
+					if(DEBUG):
+						print(possibleSentinel)
+						print("%s - %s" % (wrapByte, sentinel[senIndex]))
 					wrapIndex += interval
 					if(wrapByte == sentinel[senIndex]):
-						possibleSentinel.append(wrapByte)
+						possibleSentinel[senIndex] = wrapByte
 						senIndex += 1
 					else:
-						del possibleSentinel[:]
+						possibleSentinel = [0] * 6
 						senIndex = 0
 					hiddenFile.append(wrapByte)
 			###########################
 		hiddenFile = hiddenFile[:len(hiddenFile)-senLegth]
+		print("CONGRATS")
 
 	elif (method == 0): # Bit method
 		pass
@@ -179,18 +178,18 @@ for i in sys.argv[1:]:
 
 # runs retrieve or store based on the mode
 # includes error handling for errors that I encountered
-try:
-	if (mode == 1):
-		retrieve()
-	elif (mode == 0):
-		store()
-except IndexError:
-	sys.stderr.write("Invalid mode... exitting with error code 2...\n")
-	exit(2)
-except NameError:
-	sys.stderr.write\
-	("Mode (store/retrieve) not set, please try again or see '--help' for more options.\n")
-	exit(2)
+# try:
+if (mode == 1):
+	retrieve()
+elif (mode == 0):
+	store()
+# except IndexError:
+# 	sys.stderr.write("Invalid mode... exitting with error code 2...\n")
+# 	exit(2)
+# except NameError:
+# 	sys.stderr.write\
+# 	("Mode (store/retrieve) not set, please try again or see '--help' for more options.\n")
+# 	exit(2)
 
 # Program exits successfully
 exit(0)

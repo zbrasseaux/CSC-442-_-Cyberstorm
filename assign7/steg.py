@@ -12,7 +12,7 @@ from PIL import Image
 # 2 : No MODE set
 # 3 : No METHOD set
 
-DEBUG = False
+DEBUG = True
 
 # global var declarations
 FLAG = ''
@@ -27,7 +27,6 @@ interval = INTERVAL
 
 sentinelInt = [0, 255, 0, 0, 255, 0]
 sentinel = bytearray(sentinelInt)
-print(type(sentinel[0]))
 
 def help():
 	'''help fxn that gives the usage and options'''
@@ -51,8 +50,6 @@ def file_to_bin(inFile):
 	with open(inFile, "rb") as file:
 		data = file.read()
 		out_bin = bytearray(data)
-	if(DEBUG):
-		print(out_bin[0])
 	return out_bin
 
 #store (-s) a hidden image within an image
@@ -100,19 +97,21 @@ def store(offset):
 
 #retrieve (-r) a hidden image from an image
 def retrieve():
-	#get the wrapper image's binary (excluding the header/offset)
-	wrapper_bin = file_to_bin(wrapper)[offset:]
+	#get the wrapper image's binary
+	wrapper_bin = file_to_bin(wrapper)
 	if(DEBUG):
+		print("WRAPPER BEGINS")
 		for b in wrapper_bin:
 			print(b)
 	wrapLength = len(wrapper_bin)
-	#wrapIndex is 0 since we already removed the offset
-	wrapIndex = 0
+	#wrapIndex 
+	wrapIndex = wrapLength - offset
 	if(DEBUG):
+		print("LENGTH OF WRAPPER")
 		print(len(wrapper_bin))
 
 	#array to store the hidden file we are going to retrieve
-	hiddenFile = []
+	hiddenBytes = []
 
 	#create an empty array that we will fill as we match values in the wrapper_bin to the sentinel
 	possibleSentinel = [0] * 6
@@ -126,7 +125,7 @@ def retrieve():
 		while (possibleSentinel != sentinel):
 			while(senIndex < senLegth):
 				#we did not find the sentinel before EOF
-				if(wrapIndex + interval >= wrapLength):
+				if(wrapIndex - interval <= 0):
 					print("Sentinel was not found... assuming there was no hidden data and exitting...")
 					exit(0)
 				#not EOF yet
@@ -134,13 +133,14 @@ def retrieve():
 					#get the byte at the current index			
 					wrapByte = wrapper_bin[wrapIndex]
 					if(DEBUG):
-						print(possibleSentinel)
 						print("%s - %s" % (wrapByte, sentinel[senIndex]))
-					wrapIndex += interval
+					wrapIndex -= interval
 					#if the byte matches the sentinel
 					if(wrapByte == sentinel[senIndex]):
+						# print("MATCH...")
 						#then add the byte to the possibleSentinel
 						possibleSentinel[senIndex] = wrapByte
+						# print(possibleSentinel)
 						#and go to the next byte in the possibleSentinel
 						senIndex += 1
 					#there was no match
@@ -150,10 +150,10 @@ def retrieve():
 						#start over at the first byte of the possibleSentinel
 						senIndex = 0
 					#append the byte to the hiddenFile regardless if we found a match or not
-					hiddenFile.append(wrapByte)
+					hiddenBytes.append(wrapByte)
 			###########################
 		#once we are here, we must have found a sentinel, so remove it from the hiddenFile
-		hiddenFile = hiddenFile[:len(hiddenFile)-senLegth]
+		hiddenBytes = hiddenBytes[:len(hiddenFile)-senLegth]
 		print("A hidden file has been retrieved!\n%s" % hiddenFile)
 
 	elif (method == 0): # Bit method
@@ -162,12 +162,14 @@ def retrieve():
 			wrapByte = 0
 			for i in range(8):
 				#we did not find the sentinel before EOF
-				if(wrapIndex + interval >= wrapLength | wrapIndex >= wrapLength):
+				if(wrapIndex - interval <= 0 | wrapIndex <= 0):
 					print("Sentinel was not found... assuming there was no hidden data and exitting...")
 					exit(0)
 				#not EOF yet
 				else:
+					#preserve the right most bit
 					wrapper_bin[wrapIndex] &= 1
+					#shift the right most bit over
 					wrapper_bin[wrapIndex] <<= (7 - i)
 					wrapByte |= wrapper_bin[wrapIndex]
 					wrapIndex += interval
@@ -184,9 +186,9 @@ def retrieve():
 				possibleSentinel = [0] * 6
 				#start over at the first byte of the possibleSentinel
 				senIndex = 0
-			hiddenFile.append(wrapByte)
+			hiddenBytes.append(wrapByte)
 		#once we are here, we must have found a sentinel, so remove it from the hiddenFile
-		hiddenFile = hiddenFile[:len(hiddenFile)-senLegth]
+		hiddenBytes = hiddenBytes[:len(hiddenBytes)-senLegth]
 		print("A hidden file has been retrieved!\n%s" % hiddenFile)
 	else:
 		sys.stderr.write\

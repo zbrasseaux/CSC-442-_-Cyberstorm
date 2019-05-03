@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+
+'''I am currently running the command python steg.py -B -r -o1024 -i8 -wstegged-byte.bmp >> test.txt so I can the the entirety of the output'''
 import sys
 import binascii
 from PIL import Image
@@ -48,7 +50,7 @@ def file_to_bin(inFile):
 	with open(inFile, "rb") as file:
 		data = file.read()
 		out_bin = bytearray(data)
-		print(out_bin[0])
+		# print(out_bin[0])
 	return out_bin
 
 #store (-s) a hidden image within an image
@@ -88,9 +90,9 @@ def store():
 #retrieve (-r) a hidden image from an image
 def retrieve():
 	wrapper_bin = file_to_bin(wrapper)[offset:]
-	# if(DEBUG):
-	# 	for b in wrapper_bin:
-	# 		print(b)
+	if(DEBUG):
+		for b in wrapper_bin:
+			print(b)
 	wrapLength = len(wrapper_bin)
 	wrapIndex = 0
 	if(DEBUG):
@@ -126,7 +128,16 @@ def retrieve():
 		print("CONGRATS")
 
 	elif (method == 0): # Bit method
-		pass
+		while (possibleSentinel != sentinel): #while we haven't found the sentinel
+			for i in range(8):
+				if(wrapIndex + interval >= wrapLength | wrapIndex >= wrapLength): #we did not find the sentinel before EOF
+					print("Sentinel was not found... assuming there was no hidden data and exitting...")
+					exit(0)
+				else:
+					wrapper_bin[wrapIndex] &= bytes(1)
+			###########################
+		hiddenFile = hiddenFile[:len(hiddenFile)-senLegth]
+		print("CONGRATS")
 	else:
 		sys.stderr.write\
 		("Method (bit/byte) not set, please try again or see '--help' for more options.\n")

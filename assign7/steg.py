@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-from PIL import Image
 import binascii
+from PIL import Image
 
 ####### Error Codes #######
 # 0 : Exited with no issues
@@ -10,23 +10,20 @@ import binascii
 # 2 : No MODE set
 # 3 : No METHOD set
 
+DEBUG = False
+
 # global var declarations
-
-# INTERVAL defaults to 1
-INTERVAL = 1
-
 FLAG = ''
 MODE = ''
 METHOD = ''
 OFFSET = ''
+INTERVAL = 1
 WRAPPER_FILE = ''
 HIDDEN_FILE = ''
 
-# 2 : No mode set
+interval = INTERVAL
 
-# interval defaults to 1
-interval = 1
-
+sentinel = [00000000, 11111111, 00000000, 00000000, 11111111, 00000000]
 
 def help():
 	'''help fxn that gives the usage and options'''
@@ -52,65 +49,87 @@ def file_to_bin(inFile):
 		while (byte != ''):
 			try:
 				out_bin.append(bin(int(binascii.hexlify(byte), 16))[2:].zfill(8))
-				# print(wrapper_bin)
 				byte = file.read(1)
 			except ValueError:
-				break
-
+				sys.stderr.write\
+				("An error has occurred while converting the image to binary... exitting with error code 1...\n")
+				exit(1)
+		###########################
+	if(DEBUG):
+		print(len(out_bin))
 	return out_bin
 
-def test():
-	'''some code to test that the different flags work'''
-
-	print('Mode : ' + str(mode))
-
-	try:
-		print('Method : ' + str(method))
-	except NameError:
-		print("Method : Not set")
-
-	print('Interval : ' + str(interval))
-
-	try:
-		print('Offset : ' + str(offset))
-	except NameError:
-		print("Offset : Not set")
-
-	try:
-		print('Hidden File : ' + hiddenFile)
-	except NameError:
-		print("Hidden File : Not set")
-
-	try:
-		print('Wrapper : ' + wrapper)
-	except NameError:
-		print("Wrapper : Not set")
-
+#store (-s) a hidden image within an image
 def store():
-	return 0
+	hidden_bin = file_to_bin(hiddenFile)
+	wrapper_bin = file_to_bin(wrapper)
+	if (method == 1): # Byte method
+		i = 0
+		while(i < len(hidden_bin)):
+			wrapper_bin[offset] = hidden_bin[i]
+			offset += interval
+			i+=1
+		###########################
+		i = 0
+		while(i < len(sentinel)):
+			wrapper_bin[offset] = sentinel[i]
+			offset += interval
+			i+=1
+		###########################
+	elif (method == 0): # Bit method
+		i = offset
+		j = 0
+		hidden_bin += sentinel
+		while(j < len(hidden_bin)):
+			for k in range(7):
+				wrapper_bin[i] &= 11111110
+				wrapper_bin[i] |= ((hidden_bin[j] & 10000000) >> 7)
+				hidden_bin[j] <<= 1
+			###########################
+			j+=1
+		###########################
+	else:
+		sys.stderr.write\
+		("Method (bit/byte) not set, please try again or see '--help' for more options.\n")
+		exit(3)
 
+#retrieve (-r) a hidden image from an image
 def retrieve():
 	wrapper_bin = file_to_bin(wrapper)[offset:]
+	wrapLength = len(wrapper_bin)
+	wrapIndex = 0
+	wrapByte = wrapper_bin[wrapIndex]
+	if(DEBUG):
+		print(len(wrapper_bin))
+
+	hiddenFile = []
+	possibleSentinel = []
+	psenIndex = 0
+	senLegth = len(sentinel)
 
 	sys.stdout.write("Converting to arrays of binary.\n")
 
-	for byte in wrapper_bin:
-		print(byte)
-
-	# print(wrapper_bin)
-
 	if (method == 1): # Byte method
+		while (possibleSentinel != sentinel): #while we haven't found the sentinel
+			while(senIndex < senLegth):
+				if(wrapIndex + interval >= wrapLength):
+					print("Sentinel was not found... assuming there was no hidden data and exitting...")
+					exit(0)
+				else:
+					wrapIndex += interval
+					if(wrapByte == sentinel[senIndex]):
+						possibleSentinel.append(wrapByte)
+						senIndex += 1
 		return 0
+
 	elif (method == 0): # Bit method
 		return 0
 	else:
 		sys.stderr.write\
-		("Method (bit/byte) not set, please try again or see '--help' for more options.")
+		("Method (bit/byte) not set, please try again or see '--help' for more options.\n")
+		exit(3)
 
-	# sys.stdout.write(binArr)
-
-
-##### Main Program #####
+#################################################################################################################### Main Program #####
 
 flag = ''
 
@@ -154,8 +173,6 @@ for i in sys.argv[1:]:
 			", please try again, or use --help for more options.\n")
 		exit(1)
 
-test()
-
 # runs retrieve or store based on the mode
 # includes error handling for errors that I encountered
 try:
@@ -164,14 +181,12 @@ try:
 	elif (mode == 0):
 		store()
 except IndexError:
-	sys.stderr.write("Invalid mode... Exiting with error code 2...\n")
+	sys.stderr.write("Invalid mode... exitting with error code 2...\n")
 	exit(2)
 except NameError:
 	sys.stderr.write\
 	("Mode (store/retrieve) not set, please try again or see '--help' for more options.\n")
 	exit(2)
-
-# test()
 
 # Program exits successfully
 exit(0)

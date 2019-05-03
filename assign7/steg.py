@@ -27,6 +27,7 @@ interval = INTERVAL
 
 sentinelInt = [0, 255, 0, 0, 255, 0]
 sentinel = bytearray(sentinelInt)
+print(type(sentinel[0]))
 
 def help():
 	'''help fxn that gives the usage and options'''
@@ -129,13 +130,24 @@ def retrieve():
 
 	elif (method == 0): # Bit method
 		while (possibleSentinel != sentinel): #while we haven't found the sentinel
+			wrapByte = 0
 			for i in range(8):
 				if(wrapIndex + interval >= wrapLength | wrapIndex >= wrapLength): #we did not find the sentinel before EOF
 					print("Sentinel was not found... assuming there was no hidden data and exitting...")
 					exit(0)
 				else:
-					wrapper_bin[wrapIndex] &= bytes(1)
+					wrapper_bin[wrapIndex] &= 1
+					wrapper_bin[wrapIndex] <<= (7 - i)
+					wrapByte |= wrapper_bin[wrapIndex]
+					wrapIndex += interval
 			###########################
+			if(wrapByte == sentinel[senIndex]):
+				possibleSentinel[senIndex] = wrapByte
+				senIndex += 1
+			else:
+				possibleSentinel = [0] * 6
+				senIndex = 0
+			hiddenFile.append(wrapByte)
 		hiddenFile = hiddenFile[:len(hiddenFile)-senLegth]
 		print("CONGRATS")
 	else:

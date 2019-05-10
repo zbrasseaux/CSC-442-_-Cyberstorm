@@ -17,6 +17,7 @@ timings = [float(a) for a in timings]
 
 keypress = timings[:len(timings)/2+1]
 keyinterval = timings[len(timings)/2:]
+keyinterval.append(0.0)
 
 i = 0
 

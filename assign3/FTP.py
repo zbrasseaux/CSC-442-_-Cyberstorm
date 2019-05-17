@@ -4,14 +4,16 @@
 #https://github.com/zbrasseaux/CSC-442-_-Cyberstorm
 #If you need access to it, please email any of out members.
 #'''
-from ftplib import FTP
 
-PATH = '/.lookee-here/now-in-here'
-PRINT = False
-WEBSITE = '138.47.148.167'
-USERNAME = 'spartans'
-PASSWORD = 'spartansSPARTANSspartans'
-METHOD = 10
+
+#CMD Arguments:
+#python.py website username password port 10/7bit path
+#to connect with no specific port, enter 'None' into the port argument
+
+
+import sys
+from ftplib import FTP
+import os
 
 #Method to convert incoming data into a binary format
 def conToBinary(filePermList):
@@ -50,25 +52,9 @@ def conToASCII(binaryInt):
     print (''.join(ASCIIrep))
     return (ASCIIrep)
 
-
-dirList = []
-ftp = FTP()
-ftp.connect(WEBSITE, 8008)
-ftp.login(user= USERNAME, passwd = PASSWORD)
-ftp.cwd(str(PATH))
-ftp.retrlines('LIST',dirList.append)
-ftp.quit()
-
-#Cuts incoming file data to strictly the permissions only
-filePermList = []
-for i in range(len(dirList)):
-    #print dirList[i][0:10]
-    filePermList.append(dirList[i][0:10])
-    
-#############################################################################################################################
-#7 BIT CODE
-if(METHOD == 7):
-## Determines if there is a permission in first 3, marks to ignore if true
+################################################################################################
+def BIT7(filePermList, PRINT):
+    ## Determines if there is a permission in first 3, marks to ignore if true
     errorCounter = 0
     for i in range(len(filePermList)):
         #print "Running index {} of dirList, value is : {}".format(i, filePermList[i])
@@ -99,35 +85,17 @@ if(METHOD == 7):
     fullBinary = conToBinary(permList)  #Runs method to convert list to binary  
     binaryInt = conToInt(fullBinary)    #Runs method to convert binary list to integer
     ASCII = conToASCII(binaryInt)   #Runs method to convert integers to ASCII characters
-    
+################################################################################################
+
 ################################################################################################
 #10 BIT CODE
-elif(METHOD == 10):
+def BIT10(filePermList, PRINT):
     longString = []
     for r in range(len(filePermList)):
-        longString.append(filePermList[r])
-        
+        longString.append(filePermList[r]) 
     if(PRINT == True):
         print("")
         print("String: {}".format(longString))
-
-#Finds if the length is easily broken up into groups of 7, adds zeroes to the last one if not
-    lengthString = len(longString)
-    modVal = lengthString % 7
-    if(PRINT == True):
-        print("Mod Value: {}".format(modVal))
-        
-    if(modVal != 0):
-        addValue = 8-modVal
-        if(PRINT == True):
-            print("Modulus is not 0, adding {} to final sequence...".format(addValue))
-            print(longString[-1])
-            
-        longString[-1] = ("-"*addValue) + longString[-1]
-        
-        if(PRINT == True):
-            print(longString[-1])
-            print("\nNew String (still in list format): {}".format(longString))
             
     newString = ""
     for n in range(len(longString)):
@@ -145,17 +113,67 @@ elif(METHOD == 10):
         print("\nConverted to bit7 format: ")
         for b in range(len(bit7Convert)):
             print(bit7Convert[b])
+#Finds if the length is easily broken up into groups of 7, adds zeroes to the last one if not
+    lengthString = len(longString)
+    modVal = lengthString % 7
+    if(PRINT == True):
+        print("Mod Value: {}".format(modVal))
+        
+    if(modVal != 0):
+        addValue = 8-modVal
+        if(PRINT == True):
+            print("Modulus is not 0, adding {} to final sequence...".format(addValue))
+            print(longString[-1])
             
+        longString[-1] = ("-"*addValue) + longString[-1]
+        
+        if(PRINT == True):
+            print(longString[-1])
+            print("\nNew String (still in list format): {}".format(longString))
 #Runs method to convert list to binary    
     fullBinary = conToBinary(bit7Convert)
 #Runs method to convert binary list to integer
     binaryInt = conToInt(fullBinary)
 #Runs method to convert integers to ASCII characters
     ASCII = conToASCII(binaryInt)
+##################################################################################################
+#print(sys.argv[1])
+#print(sys.argv[2])
+#print(sys.argv[3])
+#print(sys.argv[4])
+
+PRINT = False
+dirList = []
+WEBSITE = str(sys.argv[1])
+USERNAME = str(sys.argv[2])#'anonymous'
+PASSWORD = str(sys.argv[3])
+PORT = sys.argv[4]
+METHOD = int(sys.argv[5]) #10
+try: 
+    PATH = sys.argv[6]
+except(IndexError):
+    print("path not found in arguments, defaulting to METHOD.")
+    PATH = METHOD
+
+ftp = FTP()
+if(PORT == 'None'):
+    ftp.connect(WEBSITE)
+else:
+    ftp.connect(WEBSITE,PORT)
+ftp.login(user= USERNAME, passwd = PASSWORD)
+ftp.cwd(str(METHOD))
+ftp.retrlines('LIST',dirList.append)
+ftp.quit()
+#Cuts incoming file data to strictly the permissions only
+filePermList = []
+for i in range(len(dirList)):
+    #print dirList[i][0:10]
+    filePermList.append(dirList[i][0:10])
+
+if(METHOD == 7):
+    BIT7(filePermList,PRINT)
+elif(METHOD == 10):
+    BIT10(filePermList,PRINT)
 else:
     print("Please enter a 7 or 10 into the METHOD variable, other values will not be accepted.")
     exit(0);
-        
-    
-        
-    

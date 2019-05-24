@@ -1,19 +1,11 @@
-#'''
-#Team Celtics
-#Link to private GitHub:
-#https://github.com/zbrasseaux/CSC-442-_-Cyberstorm
-#If you need access to it, please email any of out members.
-#'''
-
-
-#CMD Arguments:
-#python.py website username password port 10/7bit path
-#to connect with no specific port, enter 'None' into the port argument
-
-
+#!/usr/bin/env python
 import sys
 from ftplib import FTP
 import os
+
+#python.py -m/a
+#Input scheme: python.py -m/a website username password port path method
+PRINT = False
 
 #Method to convert incoming data into a binary format
 def conToBinary(filePermList):
@@ -69,7 +61,7 @@ def BIT7(filePermList, PRINT):
         print("")
         for l in range(len(filePermList)):
             print(filePermList[l])
-            
+           
 ## Removes the files marked to be ignored  
     for t in range(errorCounter):
         filePermList.remove("ERRONEOUS")
@@ -87,20 +79,22 @@ def BIT7(filePermList, PRINT):
     ASCII = conToASCII(binaryInt)   #Runs method to convert integers to ASCII characters
 ################################################################################################
 
+
+
 ################################################################################################
 #10 BIT CODE
 def BIT10(filePermList, PRINT):
     longString = []
     for r in range(len(filePermList)):
-        longString.append(filePermList[r]) 
+        longString.append(filePermList[r])
+        
     if(PRINT == True):
         print("")
-        print("String: {}".format(longString))
-            
+        print("String: {}".format(longString))  
     newString = ""
     for n in range(len(longString)):
-        newString += longString[n]
-            
+        newString += longString[n]  
+
     if(PRINT == True):
         print("New String in comprehensive format: {}".format(newString))
         print("Length%7: {}".format(len(newString)%7))
@@ -118,15 +112,15 @@ def BIT10(filePermList, PRINT):
     modVal = lengthString % 7
     if(PRINT == True):
         print("Mod Value: {}".format(modVal))
-        
+
     if(modVal != 0):
         addValue = 8-modVal
         if(PRINT == True):
             print("Modulus is not 0, adding {} to final sequence...".format(addValue))
             print(longString[-1])
-            
-        longString[-1] = ("-"*addValue) + longString[-1]
-        
+
+        longString[-1] = ("-"*addValue) + longString[-1]  
+
         if(PRINT == True):
             print(longString[-1])
             print("\nNew String (still in list format): {}".format(longString))
@@ -136,44 +130,94 @@ def BIT10(filePermList, PRINT):
     binaryInt = conToInt(fullBinary)
 #Runs method to convert integers to ASCII characters
     ASCII = conToASCII(binaryInt)
-##################################################################################################
-#print(sys.argv[1])
-#print(sys.argv[2])
-#print(sys.argv[3])
-#print(sys.argv[4])
 
-PRINT = False
-dirList = []
-WEBSITE = str(sys.argv[1])
-USERNAME = str(sys.argv[2])#'anonymous'
-PASSWORD = str(sys.argv[3])
-PORT = sys.argv[4]
-METHOD = int(sys.argv[5]) #10
-try: 
-    PATH = sys.argv[6]
+
+
+############################ MAIN CODE #############################################
+
+def getData():
+    dirList = []
+    ftp.retrlines('LIST',dirList.append)
+    filePermList = []
+    for i in range(len(dirList)):
+        #print dirList[i][0:10]
+        filePermList.append(dirList[i][0:10])
+    return filePermList
+
+def getConnectionInfo():
+    try:
+        WEBSITE = sys.argv[2]
+    except(IndexError):
+        WEBSITE = raw_input("Please enter the website to connect to")
+    try:
+        USERNAME = sys.argv[3]
+    except(IndexError):
+        USERNAME = raw_input("Please enter the username")
+    try:
+        PASSWORD = sys.argv[4]
+    except(IndexError):
+        PASSWORD = raw_input("Please enter the password")
+    try:
+        PORT = sys.argv[5]
+    except(IndexError):
+        PORT = raw_input("Please enter the port to connect with, or type default")
+    try:
+        PATH = sys.argv[6]
+    except(IndexError):
+        PATH = raw_input("Please enter the path, or type default")
+    try:
+        METHOD = sys.argv[7]
+    except(IndexError):
+        METHOD = raw_input("Please enter the method of decryption")
+    connectionData = [WEBSITE,USERNAME,PASSWORD,PORT,PATH,METHOD]
+    return connectionData
+
+try:
+    connectType = sys.argv[1]
+    connectionInfo = getConnectionInfo()
 except(IndexError):
-    print("path not found in arguments, defaulting to METHOD.")
-    PATH = METHOD
-
+    print("Did not specify manual or auto, defaulting to auto")
+    connectionInfo = getConnectionInfo()
+    connectType = '-r'
+if(PRINT):
+	print("Website: {}".format(connectionInfo[0]))
+	print("Username: {}".format(connectionInfo[1]))
+	print("Password: {}".format(connectionInfo[2]))
+	print("Port: {}".format(connectionInfo[3]))
+	print("Path: {}".format(connectionInfo[4]))
+	print("Method: {}".format(connectionInfo[5]))
 ftp = FTP()
-if(PORT == 'None'):
-    ftp.connect(WEBSITE)
+if(connectionInfo[3] == 'default'):
+    ftp.connect(connectionInfo[0])
 else:
-    ftp.connect(WEBSITE,PORT)
-ftp.login(user= USERNAME, passwd = PASSWORD)
-ftp.cwd(str(METHOD))
-ftp.retrlines('LIST',dirList.append)
-ftp.quit()
-#Cuts incoming file data to strictly the permissions only
-filePermList = []
-for i in range(len(dirList)):
-    #print dirList[i][0:10]
-    filePermList.append(dirList[i][0:10])
+    ftp.connect(connectionInfo[0],connectionInfo[3])
+ftp.login(user = connectionInfo[1], passwd = connectionInfo[2])
+if(connectionInfo[4] == 'default'):
+    print("No set path to direct to")
+else:
 
-if(METHOD == 7):
-    BIT7(filePermList,PRINT)
-elif(METHOD == 10):
-    BIT10(filePermList,PRINT)
+    ftp.cwd(str(connectionInfo[4]))
+
+if(connectType == '-r'):
+    serverData = getData()
+elif(connectType == '-m'):
+    manual = True
+    while(manual == True):
+        command = raw_input("Please enter a command")
+        if(command == '-r'):
+            serverData = getData()
+            manual = False
+        else:
+            try:
+                ftp.voidcmd(command)
+            except():
+                print("Did not work")
+ftp.close()
+if(int(connectionInfo[5]) == 7):
+    BIT7(serverData,PRINT)
+elif(int(connectionInfo[5]) == 10):
+    BIT10(serverData,PRINT)
 else:
     print("Please enter a 7 or 10 into the METHOD variable, other values will not be accepted.")
+
     exit(0);
